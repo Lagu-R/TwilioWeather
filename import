@@ -1,0 +1,51 @@
+import requests
+import os
+from twilio.rest import Client
+
+#CONSTANTS
+# ANGELA_API_KEY = "69f04e4613056b159c2761a9d9e664d2"
+# API Constants 
+OWM_EndPOINT = "https://api.openweathermap.org/data/2.5/forecast"
+API_KEY = "API_KEY"
+MY_LAT = 41.693630 # latitude
+MY_LONG = 44.801620 # longitude
+
+parameters = {
+    "lon" : MY_LONG,
+    "lat" : MY_LAT,
+    "appid": API_KEY,
+    "units" : "metric"
+}
+
+#Twilio Details
+#TWilio number (+12295751303)
+account_sid = "Twilio_account_Id"
+auth_token = "TWilio_auTh_token"
+
+
+
+
+response = requests.get(OWM_EndPOINT,params=parameters)
+response.raise_for_status()
+weather_data = response.json()
+
+# rain  variable
+will_rain = False
+
+twelve_days = weather_data["list"][:12]
+for hour_data in twelve_days:
+    condition_id = hour_data["weather"][0]["id"]
+    if int(condition_id) < 700:
+        will_rain = True
+
+
+if will_rain:
+  # set up twilio client.
+    client = Client(account_sid, auth_token)
+    message = client.messages.create(
+        body="It's going to rain today. bring an umbrela <3",
+        from_="Twilio_number",
+        to="To_number"
+)
+    
+    print(message.status)
